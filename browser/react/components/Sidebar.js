@@ -31,6 +31,7 @@ const Sidebar = (props) => {
               <li className="playlist-item menu-item" key={playlist.id}>
                 <Link to={`/playlist/${playlist.id}`}>{playlist.name}</Link>
               </li>
+
             ))
           }
 

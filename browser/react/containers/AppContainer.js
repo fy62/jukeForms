@@ -26,6 +26,8 @@ export default class AppContainer extends Component {
     this.postPlaylist = this.postPlaylist.bind(this);
     this.selectPlaylist = this.selectPlaylist.bind(this);
     this.postSong = this.postSong.bind(this);
+    this.removeSong = this.removeSong.bind(this);
+    this.removePlaylist = this.removePlaylist.bind(this);
   }
 
   componentDidMount () {
@@ -169,6 +171,35 @@ export default class AppContainer extends Component {
         // response json from the server!
       });
   }
+  removeSong(playlistId, songId) {
+    return axios.delete(`api/playlists/${playlistId}/songs/${songId}`)
+      .then(res => res.data)
+      .then(result => {
+        //const index = this.state.playlists.findIndex(playlist => playlist.id === playlistId);
+        //const updatedSongs = [...this.state.playlists[index].songs, result];
+        const currPlaylist = this.state.selectedPlaylist;
+        const index = currPlaylist.songs.findIndex(song => song.id == songId);
+        const songs = [...currPlaylist.songs];
+        songs.splice(index, 1);
+        currPlaylist.songs = songs;
+        this.setState({ selectedPlaylist: currPlaylist});
+        return result;
+        // response json from the server!
+      });
+  }
+
+  removePlaylist(playlistId) {
+    return axios.delete( `/api/playlists/${playlistId}`)
+      .then(res => res.data)
+      .then(result => {
+        const index = this.state.playlists.findIndex(playlist => playlist.id == playlistId);
+        const playlists = [...this.state.playlists];
+        playlists.splice(index, 1);
+        this.setState({ playlists: playlists });
+        return result;
+        // response json from the server!
+      });
+  }
 
   render () {
 
@@ -179,7 +210,9 @@ export default class AppContainer extends Component {
       selectArtist: this.selectArtist,
       postPlaylist: this.postPlaylist,
       selectPlaylist: this.selectPlaylist,
-      postSong: this.postSong
+      postSong: this.postSong,
+      removeSong: this.removeSong,
+      removePlaylist: this.removePlaylist
     });
 
     return (
