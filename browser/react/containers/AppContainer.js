@@ -24,6 +24,7 @@ export default class AppContainer extends Component {
     this.selectAlbum = this.selectAlbum.bind(this);
     this.selectArtist = this.selectArtist.bind(this);
     this.postPlaylist = this.postPlaylist.bind(this);
+    this.selectPlaylist = this.selectPlaylist.bind(this);
   }
 
   componentDidMount () {
@@ -128,13 +129,27 @@ export default class AppContainer extends Component {
   }
 
   postPlaylist(name) {
-    axios.post('/api/playlists', { name: name })
+    return axios.post('/api/playlists', { name: name })
       .then(res => res.data)
       .then(result => {
-        console.log(result);
         this.setState({ playlists: [...this.state.playlists, result] });
+        return result;
         // response json from the server!
       });
+  }
+
+  selectPlaylist(playlistId){
+    Promise
+      .all([
+        axios.get(`/api/playlists/${playlistId}`),
+        axios.get(`/api/playlists/${playlistId}/songs`)
+      ])
+      .then(res => res.map(r => r.data))
+      .then(([playlist, songs]) => {
+        songs = songs.map(convertSong);
+        playlist.songs = songs;
+        this.setState({selectedPlaylist: playlist});
+      })
   }
 
   render () {
@@ -144,7 +159,8 @@ export default class AppContainer extends Component {
       toggle: this.toggle,
       selectAlbum: this.selectAlbum,
       selectArtist: this.selectArtist,
-      postPlaylist: this.postPlaylist
+      postPlaylist: this.postPlaylist,
+      selectPlaylist: this.selectPlaylist
     });
 
     return (

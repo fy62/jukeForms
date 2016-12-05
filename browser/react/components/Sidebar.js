@@ -29,7 +29,7 @@ const Sidebar = (props) => {
           {
             props.playlists && props.playlists.map(playlist => (
               <li className="playlist-item menu-item" key={playlist.id}>
-                <Link to="FILL_ME_IN">{playlist.name}</Link>
+                <Link to={`/playlist/${playlist.id}`}>{playlist.name}</Link>
               </li>
             ))
           }

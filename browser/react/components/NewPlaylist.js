@@ -1,11 +1,11 @@
 import React from 'react';
 import PlaylistNameInput from './PlaylistNameInput';
+import {browserHistory } from 'react-router';
 
 class NewPlaylist extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(this.props.postPlaylist);
     this.state = {value: '', didEnter: false};
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -20,9 +20,14 @@ class NewPlaylist extends React.Component {
     //   .then(result => {
     //     console.log(result) // response json from the server!
     //   });
-    this.props.postPlaylist(this.state.value);
-    this.setState({value: '', didEnter: false});
     event.preventDefault();
+    this.setState({value: '', didEnter: false});
+    return this.props.postPlaylist(this.state.value)
+      .then(addedPlaylist => {
+        console.log(addedPlaylist);
+        return browserHistory.push(`/playlist/${addedPlaylist.id}`)
+      })
+
   }
 
   componentDidMount () {
