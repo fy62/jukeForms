@@ -1,5 +1,6 @@
 import React from 'react';
 import Songs from './Songs';
+import SongAdder from './SongAdder';
 import { Link } from 'react-router';
 
 class SinglePlaylist extends React.Component {
@@ -7,7 +8,7 @@ class SinglePlaylist extends React.Component {
   //   super(props);
   //   console.log(React.Component);
   //   console.log(this.props);
-    
+
   // }
 
   componentDidMount () {
@@ -30,9 +31,10 @@ class SinglePlaylist extends React.Component {
     return (
       <div>
         <h3>{ this.props.selectedPlaylist.name }</h3>
-        <Songs songs={this.props.selectedPlaylist.songs} /> {/** Hooray for reusability! */}
+        <Songs songs={this.props.selectedPlaylist.songs} currentSong={this.props.currentSong} isPlaying={this.props.isPlaying} toggleOne={this.props.toggleOne}/> {/** Hooray for reusability! */}
         { this.props.selectedPlaylist.songs && !this.props.selectedPlaylist.songs.length && <small>No songs.</small> }
         <hr />
+        <SongAdder songs={this.props.songs} postSong={this.props.postSong} selectedPlaylist={this.props.selectedPlaylist}/>
       </div>
     );
   }

@@ -25,6 +25,7 @@ export default class AppContainer extends Component {
     this.selectArtist = this.selectArtist.bind(this);
     this.postPlaylist = this.postPlaylist.bind(this);
     this.selectPlaylist = this.selectPlaylist.bind(this);
+    this.postSong = this.postSong.bind(this);
   }
 
   componentDidMount () {
@@ -33,7 +34,8 @@ export default class AppContainer extends Component {
       .all([
         axios.get('/api/albums/'),
         axios.get('/api/artists/'),
-        axios.get('/api/playlists/')
+        axios.get('/api/playlists/'),
+        axios.get('/api/songs/')
       ])
       .then(res => res.map(r => r.data))
       .then(data => this.onLoad(...data));
@@ -44,11 +46,12 @@ export default class AppContainer extends Component {
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
   }
 
-  onLoad (albums, artists, playlists) {
+  onLoad (albums, artists, playlists, songs) {
     this.setState({
       albums: convertAlbums(albums),
       artists: artists,
-      playlists: playlists
+      playlists: playlists,
+      songs: songs.map(convertSong)
     });
   }
 
@@ -152,6 +155,21 @@ export default class AppContainer extends Component {
       })
   }
 
+  postSong(playlistId, songId) {
+    return axios.post(`api/playlists/${playlistId}/songs`, { id: songId })
+      .then(res => res.data)
+      .then(result => {
+        //const index = this.state.playlists.findIndex(playlist => playlist.id === playlistId);
+        //const updatedSongs = [...this.state.playlists[index].songs, result];
+        const currPlaylist = this.state.selectedPlaylist;
+        currPlaylist.songs.push(result);
+
+        this.setState({ selectedPlaylist: currPlaylist});
+        return result;
+        // response json from the server!
+      });
+  }
+
   render () {
 
     const props = Object.assign({}, this.state, {
@@ -160,7 +178,8 @@ export default class AppContainer extends Component {
       selectAlbum: this.selectAlbum,
       selectArtist: this.selectArtist,
       postPlaylist: this.postPlaylist,
-      selectPlaylist: this.selectPlaylist
+      selectPlaylist: this.selectPlaylist,
+      postSong: this.postSong
     });
 
     return (

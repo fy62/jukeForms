@@ -1,6 +1,6 @@
 import React from 'react';
 import PlaylistNameInput from './PlaylistNameInput';
-import {browserHistory } from 'react-router';
+import {hashHistory } from 'react-router';
 
 class NewPlaylist extends React.Component {
 
@@ -15,17 +15,12 @@ class NewPlaylist extends React.Component {
     this.setState({value: event.target.value, didEnter: true});
   }
   handleSubmit(event) {
-    // axios.post('/api/playlists', { name: this.state.value })
-    //   .then(res => res.data)
-    //   .then(result => {
-    //     console.log(result) // response json from the server!
-    //   });
     event.preventDefault();
     this.setState({value: '', didEnter: false});
-    return this.props.postPlaylist(this.state.value)
+    this.props.postPlaylist(this.state.value)
       .then(addedPlaylist => {
         console.log(addedPlaylist);
-        return browserHistory.push(`/playlist/${addedPlaylist.id}`)
+        hashHistory.push(`/playlist/${addedPlaylist.id}`)
       })
 
   }

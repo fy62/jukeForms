@@ -88,7 +88,7 @@
 	
 	var _NewPlaylist2 = _interopRequireDefault(_NewPlaylist);
 	
-	var _SinglePlaylist = __webpack_require__(273);
+	var _SinglePlaylist = __webpack_require__(272);
 	
 	var _SinglePlaylist2 = _interopRequireDefault(_SinglePlaylist);
 	
@@ -26503,6 +26503,7 @@
 	    _this.selectArtist = _this.selectArtist.bind(_this);
 	    _this.postPlaylist = _this.postPlaylist.bind(_this);
 	    _this.selectPlaylist = _this.selectPlaylist.bind(_this);
+	    _this.postSong = _this.postSong.bind(_this);
 	    return _this;
 	  }
 	
@@ -26511,7 +26512,7 @@
 	    value: function componentDidMount() {
 	      var _this2 = this;
 	
-	      Promise.all([_axios2.default.get('/api/albums/'), _axios2.default.get('/api/artists/'), _axios2.default.get('/api/playlists/')]).then(function (res) {
+	      Promise.all([_axios2.default.get('/api/albums/'), _axios2.default.get('/api/artists/'), _axios2.default.get('/api/playlists/'), _axios2.default.get('/api/songs/')]).then(function (res) {
 	        return res.map(function (r) {
 	          return r.data;
 	        });
@@ -26528,11 +26529,12 @@
 	    }
 	  }, {
 	    key: 'onLoad',
-	    value: function onLoad(albums, artists, playlists) {
+	    value: function onLoad(albums, artists, playlists, songs) {
 	      this.setState({
 	        albums: (0, _utils.convertAlbums)(albums),
 	        artists: artists,
-	        playlists: playlists
+	        playlists: playlists,
+	        songs: songs.map(_utils.convertSong)
 	      });
 	    }
 	  }, {
@@ -26658,6 +26660,24 @@
 	      });
 	    }
 	  }, {
+	    key: 'postSong',
+	    value: function postSong(playlistId, songId) {
+	      var _this7 = this;
+	
+	      return _axios2.default.post('api/playlists/' + playlistId + '/songs', { id: songId }).then(function (res) {
+	        return res.data;
+	      }).then(function (result) {
+	        //const index = this.state.playlists.findIndex(playlist => playlist.id === playlistId);
+	        //const updatedSongs = [...this.state.playlists[index].songs, result];
+	        var currPlaylist = _this7.state.selectedPlaylist;
+	        currPlaylist.songs.push(result);
+	
+	        _this7.setState({ selectedPlaylist: currPlaylist });
+	        return result;
+	        // response json from the server!
+	      });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	
@@ -26667,7 +26687,8 @@
 	        selectAlbum: this.selectAlbum,
 	        selectArtist: this.selectArtist,
 	        postPlaylist: this.postPlaylist,
-	        selectPlaylist: this.selectPlaylist
+	        selectPlaylist: this.selectPlaylist,
+	        postSong: this.postSong
 	      });
 	
 	      return _react2.default.createElement(
@@ -28209,7 +28230,8 @@
 	  isPlaying: false,
 	  progress: 0,
 	  playlists: [],
-	  selectedPlaylist: {}
+	  selectedPlaylist: {},
+	  songs: []
 	};
 	
 	exports.default = initialState;
@@ -28937,7 +28959,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _PlaylistNameInput = __webpack_require__(272);
+	var _PlaylistNameInput = __webpack_require__(273);
 	
 	var _PlaylistNameInput2 = _interopRequireDefault(_PlaylistNameInput);
 	
@@ -28973,16 +28995,11 @@
 	  }, {
 	    key: 'handleSubmit',
 	    value: function handleSubmit(event) {
-	      // axios.post('/api/playlists', { name: this.state.value })
-	      //   .then(res => res.data)
-	      //   .then(result => {
-	      //     console.log(result) // response json from the server!
-	      //   });
 	      event.preventDefault();
 	      this.setState({ value: '', didEnter: false });
-	      return this.props.postPlaylist(this.state.value).then(function (addedPlaylist) {
+	      this.props.postPlaylist(this.state.value).then(function (addedPlaylist) {
 	        console.log(addedPlaylist);
-	        return _reactRouter.browserHistory.push('/playlist/' + addedPlaylist.id);
+	        _reactRouter.hashHistory.push('/playlist/' + addedPlaylist.id);
 	      });
 	    }
 	  }, {
@@ -29014,47 +29031,6 @@
 	  value: true
 	});
 	
-	var _react = __webpack_require__(1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var PlaylistNameInput = function PlaylistNameInput(props) {
-	  return _react2.default.createElement(
-	    'form',
-	    { className: 'form-group', style: { marginTop: '20px' }, onSubmit: props.handleSubmit },
-	    _react2.default.createElement('input', {
-	      value: props.value,
-	      onChange: props.handleChange,
-	      className: 'form-control',
-	      placeholder: 'Enter playlist name'
-	    }),
-	    props.value.length !== 0 && props.value.length < 17 || !props.didEnter ? _react2.default.createElement('input', { type: 'submit', value: 'Submit' }) : _react2.default.createElement(
-	      'div',
-	      null,
-	      _react2.default.createElement('input', { type: 'submit', value: 'Submit', disabled: 'true' }),
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'alert alert-warning' },
-	        'Playlist must be between 1 and 16 characters long.'
-	      )
-	    )
-	  );
-	};
-	
-	exports.default = PlaylistNameInput;
-
-/***/ },
-/* 273 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _react = __webpack_require__(1);
@@ -29064,6 +29040,10 @@
 	var _Songs = __webpack_require__(263);
 	
 	var _Songs2 = _interopRequireDefault(_Songs);
+	
+	var _SongAdder = __webpack_require__(274);
+	
+	var _SongAdder2 = _interopRequireDefault(_SongAdder);
 	
 	var _reactRouter = __webpack_require__(178);
 	
@@ -29120,14 +29100,15 @@
 	          null,
 	          this.props.selectedPlaylist.name
 	        ),
-	        _react2.default.createElement(_Songs2.default, { songs: this.props.selectedPlaylist.songs }),
+	        _react2.default.createElement(_Songs2.default, { songs: this.props.selectedPlaylist.songs, currentSong: this.props.currentSong, isPlaying: this.props.isPlaying, toggleOne: this.props.toggleOne }),
 	        ' ',
 	        this.props.selectedPlaylist.songs && !this.props.selectedPlaylist.songs.length && _react2.default.createElement(
 	          'small',
 	          null,
 	          'No songs.'
 	        ),
-	        _react2.default.createElement('hr', null)
+	        _react2.default.createElement('hr', null),
+	        _react2.default.createElement(_SongAdder2.default, { songs: this.props.songs, postSong: this.props.postSong, selectedPlaylist: this.props.selectedPlaylist })
 	      );
 	    }
 	  }]);
@@ -29136,6 +29117,209 @@
 	}(_react2.default.Component);
 	
 	exports.default = SinglePlaylist;
+
+/***/ },
+/* 273 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var PlaylistNameInput = function PlaylistNameInput(props) {
+	  return _react2.default.createElement(
+	    'form',
+	    { className: 'form-group', style: { marginTop: '20px' }, onSubmit: props.handleSubmit },
+	    _react2.default.createElement('input', {
+	      value: props.value,
+	      onChange: props.handleChange,
+	      className: 'form-control',
+	      placeholder: 'Enter playlist name'
+	    }),
+	    props.value.length !== 0 && props.value.length < 17 || !props.didEnter ? _react2.default.createElement('input', { type: 'submit', value: 'Submit' }) : _react2.default.createElement(
+	      'div',
+	      null,
+	      _react2.default.createElement('input', { type: 'submit', value: 'Submit', disabled: 'true' }),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'alert alert-warning' },
+	        'Playlist must be between 1 and 16 characters long.'
+	      )
+	    )
+	  );
+	};
+	
+	exports.default = PlaylistNameInput;
+
+/***/ },
+/* 274 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var SongAdder = function (_React$Component) {
+	  _inherits(SongAdder, _React$Component);
+	
+	  function SongAdder(props) {
+	    _classCallCheck(this, SongAdder);
+	
+	    var _this = _possibleConstructorReturn(this, (SongAdder.__proto__ || Object.getPrototypeOf(SongAdder)).call(this, props));
+	
+	    _this.state = {
+	      value: 0,
+	      isRepeat: false
+	    };
+	    _this.handleChange = _this.handleChange.bind(_this);
+	    _this.handleSubmit = _this.handleSubmit.bind(_this);
+	    return _this;
+	  }
+	
+	  _createClass(SongAdder, [{
+	    key: 'checkFirst',
+	    value: function checkFirst(songs) {
+	      var ids = songs.map(function (song) {
+	        return Number(song.id);
+	      });
+	      return ids.indexOf(1) === -1;
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(event) {
+	      var songs = this.props.selectedPlaylist.songs.map(function (song) {
+	        return Number(song.id);
+	      });
+	      console.log(songs);
+	      if (songs.indexOf(Number(event.target.value)) !== -1) {
+	
+	        console.log('found repeat: ', event.target.value);
+	        this.setState({ value: event.target.value, isRepeat: true });
+	      } else this.setState({ value: event.target.value, isRepeat: false });
+	    }
+	  }, {
+	    key: 'handleSubmit',
+	    value: function handleSubmit(event) {
+	      var _this2 = this;
+	
+	      event.preventDefault();
+	      if (this.state.value != 0) {
+	        this.props.postSong(this.props.selectedPlaylist.id, this.state.value).then(function (addedSong) {
+	          _this2.setState({ value: 0, isRepeat: false });
+	          console.log(addedSong);
+	          //hashHistory.push(`/playlist/${addedPlaylist.id}`)
+	        });
+	      }
+	      // .catch(err => {
+	      //   this.setState({value: 1, isRepeat: true});
+	      // })
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'well' },
+	        _react2.default.createElement(
+	          'form',
+	          { className: 'form-horizontal', noValidate: true, name: 'songSelect', onSubmit: this.handleSubmit },
+	          _react2.default.createElement(
+	            'fieldset',
+	            null,
+	            _react2.default.createElement(
+	              'legend',
+	              null,
+	              'Add to Playlist'
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                { htmlFor: 'song', className: 'col-xs-2 control-label' },
+	                'Song'
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-xs-10' },
+	                _react2.default.createElement(
+	                  'select',
+	                  { className: 'form-control', name: 'song', onChange: this.handleChange },
+	                  _react2.default.createElement(
+	                    'option',
+	                    { value: 0 },
+	                    '--Select a song--'
+	                  ),
+	                  this.props.songs && this.props.songs.map(function (song) {
+	                    return _react2.default.createElement(
+	                      'option',
+	                      { value: song.id, key: song.id },
+	                      song.name
+	                    );
+	                  })
+	                )
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-xs-10 col-xs-offset-2' },
+	                !this.state.isRepeat ? _react2.default.createElement(
+	                  'button',
+	                  { type: 'submit', className: 'btn btn-success' },
+	                  'Add Song'
+	                ) : _react2.default.createElement(
+	                  'div',
+	                  null,
+	                  _react2.default.createElement(
+	                    'button',
+	                    { type: 'submit', className: 'btn btn-success', disabled: 'true' },
+	                    'Add Song'
+	                  ),
+	                  _react2.default.createElement(
+	                    'div',
+	                    { className: 'alert alert-warning' },
+	                    'You\'ve already added that song.'
+	                  )
+	                )
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return SongAdder;
+	}(_react2.default.Component);
+	
+	exports.default = SongAdder;
 
 /***/ }
 /******/ ]);
